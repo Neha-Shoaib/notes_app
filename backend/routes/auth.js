@@ -2,6 +2,7 @@ const express= require("express");
 const bcrypt= require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User")
+const auth = require("../middlewares/auth");
 
 const router = express.Router();
 
@@ -60,4 +61,10 @@ router.post("/login", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+router.get("/test", auth, (req, res) => {
+  res.json({ message: "You are authorized" });
+});
 module.exports = router;
+
+
