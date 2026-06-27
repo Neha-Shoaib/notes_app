@@ -6,13 +6,12 @@ import authRoutes from './routes/authRoutes.js';
 import noteRoutes from './routes/noteRoutes.js';
 import connectDB from './config/db.js';
 
-
 // 1. MUST BE INITIALIZED FIRST BEFORE ALL ROUTERS READ ENVIRONMENT POOLS
 dotenv.config();
 
 const app = express();
 
-// 2. Clear out CORS blocks for localized cross-port traffic
+// 2. Clear out CORS blocks for localized cross-port traffic (Vite default port 5173)
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
@@ -26,9 +25,9 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/notes', noteRoutes)
+app.use('/api/notes', noteRoutes);
 
-// Fix: Add a root route so hitting http://localhost:5000/ doesn't throw a 404
+// Root route 
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -55,7 +54,18 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// IMPORTANT: connect DB before starting the server so registration/login can work.
-await connectDB();
+// FIX: Wrap initialization inside an async boot function to safely handle the connection
+const startServer = async () => {
+  try {
+    // Connect to Atlas DB first
+    await connectDB();
+    
+    // Start listening only after database has cleanly initialized
+    app.listen(PORT, () => console.log(`🚀 Server executing seamlessly on port ${PORT}`));
+  } catch (error) {
+    console.error(`❌ Server bootup failed: ${error.message}`);
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, () => console.log(`🚀 Server executing on port ${PORT}`));
+startServer();
