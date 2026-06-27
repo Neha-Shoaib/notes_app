@@ -1,68 +1,108 @@
-const express = require("express");
-const router = express.Router();
-const Note = require("../models/Note");
-const auth = require("../middlewares/auth");
+import express from 'express';
+import Note from '../models/Note.js';
+import { protect } from '../middleware/authMiddleware.js'; // 👈 Import your auth middleware
 
-// ➤ GET all notes
-router.get("/all", auth, async (req, res) => {
-  const notes = await Note.find({user: req.user.id });
-  res.json(notes);
+const router = express.Router();
+
+// Apply protection middleware to ALL routes below this line
+router.use(protect);
+
+// 1. READ (Get ONLY the logged-in user's notes)
+router.get('/', async (req, res, next) => {
+  try {
+    // 🔒 FIX: Query by { user: req.user._id } instead of fetching everything
+    const notes = await Note.find({ user: req.user._id }).sort({ isPinned: -1, createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      data: notes,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-// ➤ CREATE note
-router.post("/create", auth, async (req, res) => {
+// 2. CREATE (Attach user ID to the new note)
+router.post('/', async (req, res, next) => {
   try {
-    const newNote = new Note({
-      text: req.body.text,
-      user: req.user.id
+    const { title, content, tags, isPinned } = req.body;
+
+    // 🔒 FIX: Spread body and inject the logged-in user's ID explicitly
+    const newNote = await Note.create({
+      title,
+      content,
+      tags,
+      isPinned,
+      user: req.user._id, // 👈 Saved securely under ownership
     });
 
-    const saved = await newNote.save();
-    res.json(saved);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(201).json({
+      success: true,
+      data: newNote,
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
-// ➤ DELETE note
-router.delete("/:id", async (req, res) => {
-  try{
-   const note = Note.findById(req.params.id);
-   if(!note){
-    res.status(405).json({message: "note not found"});
-   }
-   if(!note.user.toString() == note.user.id){
-    res.status(405).json("you are not allowed to do that");
-   }
-   await note.deleteOne();
-   res.json({message: "note deleted successfully"});
-  }catch(err){
-     res.status(500).json(err);
+// 3. UPDATE (Only modify if note belongs to the user)
+router.put('/:id', async (req, res, next) => {
+  try {
+    // Find the note first to verify ownership
+    const note = await Note.findById(req.params.id);
+
+    if (!note) {
+      res.status(404);
+      throw new Error('Note not found.');
+    }
+
+    // 🔒 FIX: Check if the note's user ID matches the logged-in user's ID
+    if (note.user.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('User not authorized to update this note.');
+    }
+
+    // Perform the update safely
+    const updatedNote = await Note.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedNote,
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
-// update note 
-router.put("/update/:id", auth, async (req, res) => {
+// 4. DELETE (Only remove if note belongs to the user)
+router.delete('/:id', async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
 
     if (!note) {
-      return res.status(404).json({ message: "Note not found" });
+      res.status(404);
+      throw new Error('Note not found.');
     }
 
-    if (note.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not allowed" });
+    // 🔒 FIX: Check ownership before executing database deletion
+    if (note.user.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('User not authorized to delete this note.');
     }
 
-    note.title = req.body.title;
-    note.content = req.body.content;
+    await note.deleteOne();
 
-    await note.save();
-
-    res.json(note);
-  } catch (err) {
-    res.status(500).json(err);
+    res.status(200).json({
+      success: true,
+      message: 'Note removed successfully.',
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
-module.exports = router;
+export default router;

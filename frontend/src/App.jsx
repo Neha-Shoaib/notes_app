@@ -1,55 +1,30 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-function App() {
-  const [text, setText] = useState("");
-  const [notes, setnotes] = useState([]);
- 
-  const API = "http://localhost:5000/api/notes";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { NotesProvider } from './context/NotesContext';
+import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
-  // Get notes 
- const fetchNotes = async () => {
-  try {
-    const res = await axios.get(API);
-    console.log("DATA:", res.data); // DEBUG
-    setnotes(res.data);
-  } catch (error) {
-    console.log("FETCH ERROR:", error.message);
-  }
-};
-  // add note 
-  const addNote = async ()=>{
-    await axios.post(API, {text});
-    setText("");
-    fetchNotes();
-  };
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <NotesProvider>
+          <Routes>
+            {/* Guarded Core Paths */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Dashboard />} />
+            </Route>
 
-  // Delete note 
-  const deleteNote = async (id) =>{
-    await axios.delete(`${API}/${id}`);
-    fetchNotes();
-  };
-  
-  useEffect(()=>{
-    fetchNotes();
-  }, []);
-
-  return(
-    <div style={{padding: "20px"}}>
-      <h1>Notes App</h1>
-<input
-value ={text}
-onChange={(e) =>setText(e.target.value)}
-placeholder='enter note'/>
-  <button onClick={addNote}>Add</button>
-
-  {notes.map((note) => (
-    <div key={(note._id)}>
-      {note.text}
-       <button onClick={() => deleteNote(note._id)}>Delete</button>
-    </div>
-  ))}
-      </div>
+            {/* Unauthenticated Forms Paths */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
+          </Routes>
+        </NotesProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
-
 }
-export default App
