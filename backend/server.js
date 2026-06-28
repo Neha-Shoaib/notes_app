@@ -13,7 +13,7 @@ const app = express();
 
 // 2. Clear out CORS blocks for localized cross-port traffic (Vite default port 5173)
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['https://memos-notes-app.netlify.app', 'http://localhost:5000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
