@@ -1,4 +1,4 @@
-const BASE_URL = "notesapp-production-4e00.up.railway.app";
+const BASE_URL = "notesapp-production-4e00.up.railway.app/api";
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
