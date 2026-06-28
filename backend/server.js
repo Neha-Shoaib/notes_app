@@ -6,14 +6,16 @@ import authRoutes from './routes/authRoutes.js';
 import noteRoutes from './routes/noteRoutes.js';
 import connectDB from './config/db.js';
 
-// 1. MUST BE INITIALIZED FIRST BEFORE ALL ROUTERS READ ENVIRONMENT POOLS
 dotenv.config();
 
 const app = express();
 
-// 2. Clear out CORS blocks for localized cross-port traffic (Vite default port 5173)
 app.use(cors({
-  origin: ['https://memos-notes-app.netlify.app', 'http://localhost:5000', 'http://localhost:5173'],
+  origin: [
+    'https://memos-notes-app.netlify.app', 
+    'http://localhost:5173',              
+    'http://localhost:5000'                
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -27,7 +29,6 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
 
-// Root route 
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -35,14 +36,12 @@ app.get('/', (req, res) => {
   });
 });
 
-// Fallback 404 Error handler Route
 app.use((req, res, next) => {
   res.status(404);
   const error = new Error(`Not Found - ${req.originalUrl}`);
   next(error);
 });
 
-// Main Error Boundary Interceptor middleware
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
@@ -54,14 +53,14 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// FIX: Wrap initialization inside an async boot function to safely handle the connection
 const startServer = async () => {
   try {
     // Connect to Atlas DB first
     await connectDB();
     
-    // Start listening only after database has cleanly initialized
-    app.listen(PORT, () => console.log(`🚀 Server executing seamlessly on port ${PORT}`));
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server executing seamlessly on port ${PORT}`);
+    });
   } catch (error) {
     console.error(`❌ Server bootup failed: ${error.message}`);
     process.exit(1);
