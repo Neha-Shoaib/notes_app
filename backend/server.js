@@ -51,20 +51,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Local development support
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server executing seamlessly on port ${PORT}`);
+  });
+}
 
-const startServer = async () => {
-  try {
-    // Connect to Atlas DB first
-    await connectDB();
-    
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server executing seamlessly on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error(`❌ Server bootup failed: ${error.message}`);
-    process.exit(1);
-  }
-};
-
-startServer();
+// Export for Vercel
+export default app;
