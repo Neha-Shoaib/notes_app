@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jsonwebtoken from 'jsonwebtoken';
+import connectDB from '../config/db.js';
 
 const generateToken = (id) => {
   return jsonwebtoken.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -10,6 +11,9 @@ const generateToken = (id) => {
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
   try {
+    // Ensure DB connection is active before querying
+    await connectDB();
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       res.status(400);
@@ -26,7 +30,7 @@ export const registerUser = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000, 
       });
 
       return res.status(201).json({
@@ -55,6 +59,9 @@ export const loginUser = async (req, res, next) => {
       res.status(400);
       throw new Error('Please provide an email and password');
     }
+
+    // Ensure DB connection is active before querying
+    await connectDB();
 
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
