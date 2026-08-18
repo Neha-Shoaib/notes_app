@@ -1,32 +1,21 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const MONGO_URI = process.env.MONGO_URI;
+dotenv.config();
 
-if (!MONGO_URI) {
-  throw new Error('Please define the MONGO_URI environment variable inside your Vercel settings.');
-}
-
-/**
- * Global cache across serverless function invocations (warm starts)
- */
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+let cached = global.mongoose || (global.mongoose = { conn: null, promise: null });
 
 const connectDB = async () => {
-  if (cached.conn) {
-    return cached.conn;
+  const MONGO_URI = process.env.MONGO_URI;
+
+  if (!MONGO_URI) {
+    throw new Error('Please define MONGO_URI in your .env or Vercel settings');
   }
 
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false, // Disables Mongoose buffering so operations fail fast if not connected
-      serverSelectionTimeoutMS: 5000, // Timeout faster instead of hanging for 10s
-    };
+  if (cached.conn) return cached.conn;
 
-    cached.promise = mongoose.connect(MONGO_URI, opts).then((mongooseInstance) => {
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGO_URI).then((mongooseInstance) => {
       console.log(`MongoDB Connected: ${mongooseInstance.connection.host}`);
       return mongooseInstance;
     });

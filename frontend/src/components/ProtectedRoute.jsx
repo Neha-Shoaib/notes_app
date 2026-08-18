@@ -9,7 +9,7 @@ export const ProtectedRoute = () => {
   // Show a blank screen or a loading spinner while checking authentication token status
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center text-sm font-medium">
+      <div className="min-h-screen bg-slate-50 text-slate-400 flex items-center justify-center text-sm font-medium dark:bg-slate-950 dark:text-slate-500">
         Loading secure session...
       </div>
     );
@@ -25,7 +25,7 @@ export const PublicRoute = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center text-sm font-medium">
+      <div className="min-h-screen bg-slate-50 text-slate-400 flex items-center justify-center text-sm font-medium dark:bg-slate-950 dark:text-slate-500">
         Loading secure session...
       </div>
     );
