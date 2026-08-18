@@ -12,12 +12,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: [
-    'https://notes-app-nine-omega-22.vercel.app',
-    'https://memos-notes-app.netlify.app', 
-    'http://localhost:5173',              
-    'http://localhost:5000'                
-  ],
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
