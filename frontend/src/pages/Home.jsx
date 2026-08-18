@@ -96,7 +96,7 @@ const LandingPage = () => {
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28">
+      <section className="relative overflow-hidden pt-15 pb-20 md:pt-20">
         {/* Subtle background glow graphics */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none -z-10 dark:bg-indigo-900/20" />
         
