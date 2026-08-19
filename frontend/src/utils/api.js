@@ -1,6 +1,7 @@
 
-export const API_BASE_URL = 
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const rawBase = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+
+export const API_BASE_URL = rawBase.replace(/\/+$/, '');
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
