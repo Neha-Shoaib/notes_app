@@ -79,18 +79,39 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Smooth Flowy Navigation Handler
+  const scrollToSection = (e, sectionId) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+      const headerOffset = 80; // Offset for sticky navbar
+      const elementPosition = targetElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const handleNavigateLogin = () => navigate('/login');
   const handleNavigateRegister = () => navigate('/register');
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-500/30 selection:text-indigo-200 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-500/30 selection:text-indigo-200 dark:bg-slate-950 dark:text-slate-100 scroll-smooth">
       
       {/* 1. STICKY NAVIGATION BAR */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md transition-all dark:border-slate-800 dark:bg-slate-950/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Logo */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+          <div 
+            className="flex items-center gap-2.5 cursor-pointer" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <div className="p-2 bg-indigo-600/10 rounded-xl border border-indigo-500/20 text-indigo-600 dark:bg-indigo-900/30 dark:border-indigo-400/30 dark:text-indigo-400">
               <Notebook className="w-5 h-5" />
             </div>
@@ -99,11 +120,12 @@ const Home = () => {
             </span>
           </div>
 
-          {/* Desktop Navigation Links with Hover Tooltips */}
+          {/* Desktop Navigation Links with Smooth Flowy Scrolling */}
           <nav className="hidden md:flex items-center gap-8">
             <a 
               href="#how-it-works" 
-              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white"
+              onClick={(e) => scrollToSection(e, 'how-it-works')}
+              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white cursor-pointer"
             >
               How It Works
               <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap dark:bg-slate-800">
@@ -112,7 +134,8 @@ const Home = () => {
             </a>
             <a 
               href="#features" 
-              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white"
+              onClick={(e) => scrollToSection(e, 'features')}
+              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white cursor-pointer"
             >
               Features
               <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap dark:bg-slate-800">
@@ -121,7 +144,8 @@ const Home = () => {
             </a>
             <a 
               href="#demo-section" 
-              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white"
+              onClick={(e) => scrollToSection(e, 'demo-section')}
+              className="group relative text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors dark:text-slate-400 dark:hover:text-white cursor-pointer"
             >
               Live Demo
               <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap dark:bg-slate-800">
@@ -134,13 +158,13 @@ const Home = () => {
           <div className="hidden md:flex items-center gap-4">
             <button 
               onClick={handleNavigateLogin}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2 dark:text-slate-400 dark:hover:text-white"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2 dark:text-slate-400 dark:hover:text-white cursor-pointer"
             >
               Login
             </button>
             <button 
               onClick={handleNavigateRegister}
-              className="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 dark:bg-indigo-500 dark:hover:bg-indigo-400 cursor-pointer"
             >
               Get Started Free
             </button>
@@ -148,7 +172,7 @@ const Home = () => {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 text-slate-500 hover:text-slate-900 transition-colors dark:text-slate-400 dark:hover:text-white"
+            className="md:hidden p-2 text-slate-500 hover:text-slate-900 transition-colors dark:text-slate-400 dark:hover:text-white cursor-pointer"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -157,38 +181,38 @@ const Home = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 w-full border-b border-slate-200 bg-white px-5 py-6 space-y-4 shadow-xl flex flex-col dark:border-slate-800 dark:bg-slate-900">
+          <div className="md:hidden absolute top-16 left-0 w-full border-b border-slate-200 bg-white px-5 py-6 space-y-4 shadow-xl flex flex-col dark:border-slate-800 dark:bg-slate-900 animate-in fade-in slide-in-from-top-2 duration-200">
             <a 
               href="#how-it-works" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+              onClick={(e) => scrollToSection(e, 'how-it-works')}
+              className="text-sm font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white cursor-pointer"
             >
               How It Works
             </a>
             <a 
               href="#features" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+              onClick={(e) => scrollToSection(e, 'features')}
+              className="text-sm font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white cursor-pointer"
             >
               Features
             </a>
             <a 
               href="#demo-section" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+              onClick={(e) => scrollToSection(e, 'demo-section')}
+              className="text-sm font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white cursor-pointer"
             >
               Live Demo
             </a>
             <div className="pt-4 border-t border-slate-200 flex flex-col gap-3 dark:border-slate-800">
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); handleNavigateLogin(); }}
-                className="w-full text-center font-medium text-slate-600 hover:text-slate-900 py-2.5 rounded-xl border border-slate-200 dark:text-slate-300 dark:border-slate-700"
+                className="w-full text-center font-medium text-slate-600 hover:text-slate-900 py-2.5 rounded-xl border border-slate-200 dark:text-slate-300 dark:border-slate-700 cursor-pointer"
               >
                 Login
               </button>
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); handleNavigateRegister(); }}
-                className="w-full text-center font-medium bg-indigo-600 text-white py-2.5 rounded-xl dark:bg-indigo-500"
+                className="w-full text-center font-medium bg-indigo-600 text-white py-2.5 rounded-xl dark:bg-indigo-500 cursor-pointer"
               >
                 Get Started Free
               </button>
@@ -215,21 +239,21 @@ const Home = () => {
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed dark:text-slate-400">
-            A fast, minimalistic workspace. Dictate voice notes in English, Urdu, or Roman Urdu, structure thoughts seamlessly, and sync across all devices.
+            A fast, minimalistic workspace. Dictate voice notes in English, structure thoughts seamlessly, and sync across all devices.
           </p>
 
           {/* CTA Buttons */}
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
               onClick={handleNavigateRegister}
-              className="w-full sm:w-auto group inline-flex items-center justify-center gap-2 font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="w-full sm:w-auto group inline-flex items-center justify-center gap-2 font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 dark:bg-indigo-500 dark:hover:bg-indigo-400 cursor-pointer"
             >
               <span>Create Free Account</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
             <button 
               onClick={() => setIsVideoModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-medium border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-6 py-3.5 rounded-xl transition-all dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-medium border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-6 py-3.5 rounded-xl transition-all dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
             >
               <Play className="w-4 h-4 fill-current text-indigo-600 dark:text-indigo-400" />
               <span>Watch Demo</span>
@@ -237,7 +261,7 @@ const Home = () => {
           </div>
 
           {/* 3. ANIMATED DASHBOARD PREVIEW SIMULATOR */}
-          <div id="demo-section" className="mt-16 border border-slate-200 bg-slate-900 p-3 rounded-2xl max-w-5xl mx-auto shadow-2xl relative text-left dark:border-slate-800">
+          <div id="demo-section" className="mt-16 border border-slate-200 bg-slate-900 p-3 rounded-2xl max-w-5xl mx-auto shadow-2xl relative text-left scroll-mt-24 dark:border-slate-800">
             {/* Window Toolbar Header */}
             <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-800 text-xs text-slate-400">
               <div className="flex items-center gap-2">
@@ -292,7 +316,7 @@ const Home = () => {
 
                 {/* Tags & Action Bar */}
                 <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-700/60">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-col md:flex-row lg:flex-row">
                     <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded text-[11px] flex items-center gap-1">
                       <Tag className="w-3 h-3" /> #architecture
                     </span>
@@ -300,7 +324,7 @@ const Home = () => {
                       #groq-whisper
                     </span>
                   </div>
-                  <button className="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-md shadow-indigo-600/30">
+                  <button className="bg-indigo-600 text-white text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-md shadow-indigo-600/30">
                     <Plus className="w-3 h-3" /> Save Note
                   </button>
                 </div>
@@ -333,7 +357,7 @@ const Home = () => {
       </section>
 
       {/* 4. STEP-BY-STEP GUIDED SECTION */}
-      <section id="how-it-works" className="py-20 border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+      <section id="how-it-works" className="py-20 border-t border-slate-200 bg-slate-50 scroll-mt-16 dark:border-slate-800 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -379,7 +403,7 @@ const Home = () => {
       </section>
 
       {/* 5. FEATURE GRID SECTION */}
-      <section id="features" className="py-20 border-t border-slate-200 bg-white relative dark:border-slate-800 dark:bg-slate-950">
+      <section id="features" className="py-20 border-t border-slate-200 bg-white relative scroll-mt-16 dark:border-slate-800 dark:bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -449,7 +473,7 @@ const Home = () => {
               </span>
               <button 
                 onClick={() => setIsVideoModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -463,7 +487,7 @@ const Home = () => {
                 </p>
                 <button
                   onClick={() => { setIsVideoModalOpen(false); handleNavigateRegister(); }}
-                  className="mt-6 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl"
+                  className="mt-6 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Try It Live Now
                 </button>

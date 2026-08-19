@@ -9,10 +9,10 @@ const generateToken = (id) => {
   return jsonwebtoken.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// @desc    Send 6-Digit OTP to email for verification
+// @desc    Send 6-Digit OTP to email for verification (Register or Reset Password)
 // @route   POST /api/auth/send-otp
 export const sendRegistrationOtp = async (req, res, next) => {
-  const { email } = req.body;
+  const { email, type = 'register' } = req.body;
   try {
     if (!email) {
       res.status(400);
@@ -22,9 +22,17 @@ export const sendRegistrationOtp = async (req, res, next) => {
     await connectDB();
 
     const userExists = await User.findOne({ email });
-    if (userExists) {
+
+    // 1. If registering, the user must NOT already exist
+    if (type === 'register' && userExists) {
       res.status(400);
       throw new Error('User already exists with this email');
+    }
+
+    // 2. If resetting password, the user MUST exist
+    if (type === 'reset' && !userExists) {
+      res.status(404);
+      throw new Error('No account found with this email address');
     }
 
     // Generate random 6-digit OTP
@@ -46,7 +54,7 @@ export const sendRegistrationOtp = async (req, res, next) => {
       message: 'OTP sent successfully to your email',
     });
   } catch (error) {
-    console.error("❌ CRASH INSIDE SEND OTP CONTROLLER:", error);
+    console.error('❌ CRASH INSIDE SEND OTP CONTROLLER:', error);
     next(error);
   }
 };
@@ -56,7 +64,6 @@ export const sendRegistrationOtp = async (req, res, next) => {
 export const registerUser = async (req, res, next) => {
   const { name, email, password, otp } = req.body;
   try {
-    // Ensure DB connection is active before querying
     await connectDB();
 
     if (!name || !email || !password || !otp) {
@@ -83,7 +90,7 @@ export const registerUser = async (req, res, next) => {
       throw new Error('Invalid verification code');
     }
 
-    // 2. Create user (password hashing is handled by your User model hook)
+    // 2. Create user (password hashing is handled by User model hook)
     const user = await User.create({ name, email, password });
 
     if (user) {
@@ -92,7 +99,6 @@ export const registerUser = async (req, res, next) => {
 
       const token = generateToken(user._id);
 
-      // Secure Cookie configuration
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -112,7 +118,56 @@ export const registerUser = async (req, res, next) => {
       throw new Error('Invalid user data received');
     }
   } catch (error) {
-    console.error("❌ CRASH INSIDE REGISTER CONTROLLER:", error);
+    console.error('❌ CRASH INSIDE REGISTER CONTROLLER:', error);
+    next(error);
+  }
+};
+
+// @desc    Reset password using OTP verification
+// @route   POST /api/auth/reset-password
+export const resetPassword = async (req, res, next) => {
+  const { email, otp, newPassword } = req.body;
+  try {
+    await connectDB();
+
+    if (!email || !otp || !newPassword) {
+      res.status(400);
+      throw new Error('Please provide email, OTP, and new password');
+    }
+
+    // 1. Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404);
+      throw new Error('No account found with this email');
+    }
+
+    // 2. Verify OTP
+    const otpRecord = await Otp.findOne({ email });
+    if (!otpRecord) {
+      res.status(400);
+      throw new Error('OTP has expired or was not requested');
+    }
+
+    const isMatch = await bcrypt.compare(otp.trim(), otpRecord.otp);
+    if (!isMatch) {
+      res.status(400);
+      throw new Error('Invalid verification code');
+    }
+
+    // 3. Update password and save (User pre-save hook will hash it)
+    user.password = newPassword;
+    await user.save();
+
+    // 4. Delete the used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password updated successfully. You can now log in.',
+    });
+  } catch (error) {
+    console.error('❌ CRASH INSIDE RESET PASSWORD CONTROLLER:', error);
     next(error);
   }
 };
@@ -127,7 +182,6 @@ export const loginUser = async (req, res, next) => {
       throw new Error('Please provide an email and password');
     }
 
-    // Ensure DB connection is active before querying
     await connectDB();
 
     const user = await User.findOne({ email });
@@ -153,7 +207,7 @@ export const loginUser = async (req, res, next) => {
       throw new Error('Invalid email or password');
     }
   } catch (error) {
-    console.error("❌ CRASH INSIDE LOGIN CONTROLLER:", error);
+    console.error('❌ CRASH INSIDE LOGIN CONTROLLER:', error);
     next(error);
   }
 };
@@ -167,7 +221,7 @@ export const getMe = async (req, res, next) => {
       user: req.user,
     });
   } catch (error) {
-    console.error("❌ CRASH INSIDE ME CONTROLLER:", error);
+    console.error('❌ CRASH INSIDE ME CONTROLLER:', error);
     next(error);
   }
 };

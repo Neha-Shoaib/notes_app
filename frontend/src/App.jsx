@@ -7,6 +7,7 @@ import LandingPage from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
               <Route element={<PublicRoute />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
               </Route>
             </Routes>
           </NotesProvider>

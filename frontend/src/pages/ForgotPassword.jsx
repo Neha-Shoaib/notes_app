@@ -20,26 +20,28 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
 
   // Step 1: Send OTP to email
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    setErr('');
-    setMsg('');
-    setLoading(true);
+const handleSendOtp = async (e) => {
+  e.preventDefault();
+  setErr('');
+  setMsg('');
+  setLoading(true);
 
-    try {
-      const data = await apiRequest('/auth/send-otp', {
-        method: 'POST',
-        body: { email }
-      });
-      setMsg(data.message || 'OTP sent successfully to your email address.');
-      setStep('reset_password');
-    } catch (error) {
-      setErr(error.message || 'Failed to send OTP. Please check your email and try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  try {
+    const data = await apiRequest('/auth/send-otp', {
+      method: 'POST',
+      body: { 
+        email, 
+        type: 'reset' // or 'forgot-password' depending on your backend controller
+      }
+    });
+    setMsg(data.message || 'OTP sent successfully to your email address.');
+    setStep('reset_password');
+  } catch (error) {
+    setErr(error.message || 'Failed to send OTP.');
+  } finally {
+    setLoading(false);
+  }
+};
   // Step 2: Verify OTP and set new password
   const handleResetPassword = async (e) => {
     e.preventDefault();
