@@ -10,7 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   
-  // New State for visibility toggle
+  // State for visibility toggle
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -18,7 +18,7 @@ export default function Login() {
     setErr('');
     try {
       await login(email, password);
-      navigate('/dashboard'); // 👈 Updated path to route authenticated sessions directly to the workspace
+      navigate('/dashboard'); // Routes authenticated sessions directly to workspace
     } catch (error) {
       setErr(error.message || 'Credentials parsing match verification error.');
     }
@@ -53,9 +53,16 @@ export default function Login() {
             />
           </div>
           
-          {/* Input Block Wrapper supporting the Interactive Toggle */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 dark:text-slate-400">Password</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider dark:text-slate-400">Password</label>
+              <Link 
+                to="/forgot-password" 
+                className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+              >
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"} 
