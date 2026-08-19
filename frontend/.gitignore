@@ -24,3 +24,6 @@ build/
 *.sw?
 .env
 node_modules
+node_modules/
+.env.local
+.env.*.local
